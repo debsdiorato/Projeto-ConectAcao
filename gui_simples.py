@@ -8,8 +8,8 @@ from database import (
     atualizar_voluntario, listar_voluntarios, criar_demanda, 
     listar_demandas, buscar_demanda_por_id
 )
-from security import hash_password, verify_password
-from matching import get_matches_for_demand
+from validacoes.security import hash_password, verify_password
+from logica.matching import get_matches_for_demand
 
 load_dotenv()
 
