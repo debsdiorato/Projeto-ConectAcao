@@ -3,7 +3,7 @@ from tkinter import ttk, messagebox, simpledialog
 import os
 from dotenv import load_dotenv
 
-from db.database import (
+from banco.database import (
     criar_usuario, buscar_usuario_por_email, criar_voluntario, 
     atualizar_voluntario, listar_voluntarios, criar_demanda, 
     listar_demandas, buscar_demanda_por_id
@@ -153,7 +153,7 @@ class App(tk.Tk):
         
         # Adicionar Scrollbar
         scrollbar = ttk.Scrollbar(container, orient="vertical", command=self.vol_tree.yview)
-        self.vol_tree.configure(yscroll=scrollbar.set)
+        self.vol_tree.configure(yscrollcommand=scrollbar.set)
         
         self.vol_tree.pack(side="left", fill='both', expand=True)
         scrollbar.pack(side="right", fill="y")
@@ -247,9 +247,17 @@ class App(tk.Tk):
         if not sel: 
             messagebox.showwarning("Atenção", "Selecione uma demanda primeiro.")
             return
+        
         demand_id = int(sel.split(' - ')[0])
         demanda = buscar_demanda_por_id(demand_id)
+
+        demanda = buscar_demanda_por_id(demand_id)
+        if not demanda:
+            messagebox.showwarning("Atenção", "Demanda não encontrada.")
+        return
+
         matches = get_matches_for_demand(demanda, top_n=10)
+        
         self.match_text.delete('1.0', tk.END)
         if not matches:
             self.match_text.insert(tk.END, 'Nenhum match encontrado para esta demanda.')
