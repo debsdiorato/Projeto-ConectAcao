@@ -1,4 +1,4 @@
-from database import listar_voluntarios
+from db.database import listar_voluntarios
 import re
 
 def normalize(s: str): #transforma o texto em uma lista de habilidades:
