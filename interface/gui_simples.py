@@ -3,7 +3,7 @@ from tkinter import ttk, messagebox, simpledialog
 import os
 from dotenv import load_dotenv
 
-from db.database import (
+from Banco_dados.database import (
     criar_usuario, buscar_usuario_por_email, criar_voluntario, 
     atualizar_voluntario, listar_voluntarios, criar_demanda, 
     listar_demandas, buscar_demanda_por_id
