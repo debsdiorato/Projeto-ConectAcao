@@ -63,8 +63,8 @@ def listar_voluntarios():
         FROM voluntarios v
         JOIN usuarios u ON u.id = v.usuario_id
     """) #Select para pegar tudo na tabela voluntarios, e o nome, email e telefone da tabela usuarios
-         #join para combiar o voluntario com o usuario, o v.usuario_id é o campo dentro de voluntarios que garda qual usuario é dono daquele id
-         #em resumo, pega as informaçoes de todos os voluntarios, o nome, e-mail e telefone deles, usando a chave id_user
+        #join para combiar o voluntario com o usuario, o v.usuario_id é o campo dentro de voluntarios que garda qual usuario é dono daquele id
+        #em resumo, pega as informaçoes de todos os voluntarios, o nome, e-mail e telefone deles, usando a chave id_user
     rows = cur.fetchall() #pega todos os resultados das linhas do select e coloca no rows
     conn.close()
     return [dict(r) for r in rows] #tranforma cada linha em um dicionario, para facilitar a vida
