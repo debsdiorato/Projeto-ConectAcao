@@ -20,29 +20,32 @@ class App(tk.Tk):
         self.geometry("800x600")
         self.usuario_atual = None
 
-        nb = ttk.Notebook(self)
-        nb.pack(fill="both", expand=True)
+        # Configuração das Abas
+        self.nb = ttk.Notebook(self)
+        self.nb.pack(fill="both", expand=True)
 
-        self.tab_login = ttk.Frame(nb)
-        self.tab_vol = ttk.Frame(nb)
-        self.tab_dem = ttk.Frame(nb)
-        self.tab_match = ttk.Frame(nb)
+        # Criação dos Frames das Abas
+        self.tab_login = ttk.Frame(self.nb)
+        self.tab_vol = ttk.Frame(self.nb)
+        self.tab_dem = ttk.Frame(self.nb)
+        self.tab_match = ttk.Frame(self.nb)
 
-        nb.add(self.tab_login, text="Login / Registro")
-        nb.add(self.tab_vol, text="Voluntários")
-        nb.add(self.tab_dem, text="Demandas")
-        nb.add(self.tab_match, text="Matching")
+        self.nb.add(self.tab_login, text="Login / Registro")
+        self.nb.add(self.tab_vol, text="Voluntários")
+        self.nb.add(self.tab_dem, text="Demandas")
+        self.nb.add(self.tab_match, text="Matching")
 
-        self.build_login_tab()
-        self.build_vol_tab()
-        self.build_dem_tab()
-        self.build_match_tab()
+        # Constrói a UI uma única vez
+        self.setup_login_ui()
+        self.setup_vol_ui()
+        self.setup_dem_ui()
+        self.setup_match_ui()
 
-    def build_login_tab(self):
+    # --- ABA LOGIN ---
+    def setup_login_ui(self):
         f = self.tab_login
-        for w in f.winfo_children():
-            w.destroy()
-
+        
+        # Login
         ttk.Label(f, text="Email:").grid(row=0, column=0, padx=5, pady=5)
         self.email_entry = ttk.Entry(f, width=40)
         self.email_entry.grid(row=0, column=1, padx=5, pady=5)
@@ -54,6 +57,7 @@ class App(tk.Tk):
         ttk.Button(f, text="Login", command=self.login).grid(row=2, column=1, sticky="e", padx=5, pady=5)
         ttk.Separator(f, orient="horizontal").grid(row=3, column=0, columnspan=3, sticky="ew", pady=10)
 
+        # Registro
         ttk.Label(f, text="Registro (Voluntário):").grid(row=4, column=0, columnspan=2, sticky="w", padx=5)
         
         ttk.Label(f, text="Nome:").grid(row=5, column=0, sticky="w", padx=5, pady=2)
@@ -108,66 +112,52 @@ class App(tk.Tk):
         criar_voluntario(uid, hab, "", "")
         messagebox.showinfo("OK", "Registrado. Faça login.")
 
-    # --- MUDANÇA AQUI: Treeview para Voluntários ---
-    def build_vol_tab(self):
-        f = self.tab_vol
-        for w in f.winfo_children(): 
-            w.destroy()
+    # --- ABA VOLUNTÁRIOS ---
+    def setup_vol_ui(self):
+        # Se já existe a treeview, não recria
+        if hasattr(self, 'vol_tree'): return
         
+        f = self.tab_vol
         ttk.Label(f, text="Voluntários Cadastrados:").pack(anchor='w', padx=10, pady=5)
         
-        # Definição das colunas
         columns = ('id', 'nome', 'habilidades')
         self.vol_tree = ttk.Treeview(f, columns=columns, show='headings', height=15)
-        
-        # Configuração dos cabeçalhos e largura
         self.vol_tree.heading('id', text='ID')
         self.vol_tree.column('id', width=50, anchor='center')
-        
         self.vol_tree.heading('nome', text='Nome')
         self.vol_tree.column('nome', width=200, anchor='w')
-        
         self.vol_tree.heading('habilidades', text='Habilidades')
         self.vol_tree.column('habilidades', width=450, anchor='w')
-        
         self.vol_tree.pack(padx=10, pady=5, fill='both', expand=True)
         
         ttk.Button(f, text="Atualizar lista", command=self.atualizar_vol).pack(padx=10, pady=10)
 
     def atualizar_vol(self):
-        # Limpa os dados antigos da tabela
+        # Apenas manipula dados, sem destruir widgets
         for i in self.vol_tree.get_children():
             self.vol_tree.delete(i)
-        
-        # Insere os novos dados
         for v in listar_voluntarios():
             self.vol_tree.insert('', 'end', values=(v['id'], v['nome'], v.get('habilidades','')))
 
-    # --- MUDANÇA AQUI: Treeview para Demandas ---
-    def build_dem_tab(self):
+    # --- ABA DEMANDAS ---
+    def setup_dem_ui(self):
+        if hasattr(self, 'dem_tree'): return
+        
         f = self.tab_dem
-        for w in f.winfo_children(): 
-            w.destroy()
-            
         ttk.Label(f, text="Demandas Disponíveis:").pack(anchor='w', padx=10, pady=5)
         
         columns = ('id', 'titulo', 'skills')
         self.dem_tree = ttk.Treeview(f, columns=columns, show='headings', height=15)
-        
         self.dem_tree.heading('id', text='ID')
         self.dem_tree.column('id', width=50, anchor='center')
-        
         self.dem_tree.heading('titulo', text='Título da Demanda')
         self.dem_tree.column('titulo', width=250, anchor='w')
-        
         self.dem_tree.heading('skills', text='Habilidades Necessárias')
         self.dem_tree.column('skills', width=400, anchor='w')
-        
         self.dem_tree.pack(padx=10, pady=5, fill='both', expand=True)
         
         btnf = ttk.Frame(f)
         btnf.pack(pady=10)
-        
         ttk.Button(btnf, text="Atualizar", command=self.atualizar_dem).grid(row=0, column=0, padx=5)
         ttk.Button(btnf, text="Criar demanda", command=self.criar_demanda_dialog).grid(row=0, column=1, padx=5)
 
@@ -189,10 +179,11 @@ class App(tk.Tk):
         messagebox.showinfo('OK', 'Demanda criada')
         self.atualizar_dem()
 
-    def build_match_tab(self):
+    # --- ABA MATCHING ---
+    def setup_match_ui(self):
+        if hasattr(self, 'match_combo'): return
+
         f = self.tab_match
-        for w in f.winfo_children(): 
-            w.destroy()
         ttk.Label(f, text='Matching').pack(anchor='w', padx=8, pady=6)
         self.match_combo = ttk.Combobox(f, state='readonly', width=80)
         self.match_combo.pack(padx=8)
@@ -220,6 +211,7 @@ class App(tk.Tk):
             self.match_text.insert(tk.END, f"Score: {m['score']} — {v['nome']} | skills: {v.get('habilidades','')}\n")
 
     def atualizar_listas(self):
+        # Métodos seguros para chamar repetidamente
         try: self.atualizar_vol()
         except: pass
         try: self.atualizar_dem()
