@@ -7,60 +7,55 @@ DB_FILE = "voluntarios.db"
 
 def migrar_banco():
     """Migra banco de dados antigo para nova estrutura."""
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
+    conn = sqlite3.connect(DB_FILE) #abre conexao com o banco
+    cursor = conn.cursor() #cria o tal do cursor
     
-    try:
+    try: #tente fazer né
         # Verificar se a tabela demandas existe
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='demandas'")
-        if cursor.fetchone():
-            # Verificar estrutura da tabela
-            cursor.execute("PRAGMA table_info(demandas)")
-            colunas = [row[1] for row in cursor.fetchall()]
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='demandas'") #faz um select no sqlete_master, uma tabela interna do sqlite, para verificar a existencia de uma tabela demandas
+        if cursor.fetchone(): #pega a primeira linha do resultado
+            cursor.execute("PRAGMA table_info(demandas)") #pega informacoes da tabela demandas
+            colunas = [row[1] for row in cursor.fetchall()] #cria uma lista com todos os nomes de coluna da tabela
             
-            if 'habilidades_requeridas' in colunas:
-                # Backup dos dados existentes (se houver)
-                try:
-                    cursor.execute("SELECT id, titulo FROM demandas")
-                    dados_antigos = cursor.fetchall()
+            if 'habilidades_requeridas' in colunas: #verifica se existe um acoluna chamada habilidades_requiridas, se existe a tabela ta na versao antiga
+                try: #outro bloco de tentaiva, agora só para salvar os dados antigos
+                    cursor.execute("SELECT id, titulo FROM demandas") #pega todos os campos id e titulo da tabela antiga
+                    dados_antigos = cursor.fetchall() #guarda todos os dados na variavel
                 except:
-                    dados_antigos = []
+                    dados_antigos = [] #assume que nao há dados (pra n dar merda no programa)
                 
                 # Remover tabelas antigas
-                cursor.execute("DROP TABLE IF EXISTS demanda_habilidades")
-                cursor.execute("DROP TABLE IF EXISTS demandas")
+                cursor.execute("DROP TABLE IF EXISTS demanda_habilidades") #apaga a tabela demanda_habilidades caso exista
+                cursor.execute("DROP TABLE IF EXISTS demandas") #apaga a tabela demanda se ela existir
                 
-                # Recriar tabela com estrutura nova
                 cursor.execute("""
                     CREATE TABLE demandas (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         titulo TEXT NOT NULL,
                         criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                     )
-                """)
+                """) #recria a tabela demandas, sem o demanda_habilidade
                 
-                # Restaurar dados (sem habilidades_requeridas)
-                for row in dados_antigos:
+                for row in dados_antigos: #percorre cada linha salva da tabela antiga
                     cursor.execute(
                         "INSERT INTO demandas (id, titulo) VALUES (?, ?)",
-                        (row[0], row[1])
+                        (row[0], row[1]) #insire cada registro na tabela antiga
                     )
                 
-                conn.commit()
+                conn.commit() #confirmar as alteracoes feitas né
     except Exception as e:
         # Se der erro, tenta continuar
         conn.rollback()
     finally:
-        conn.close()
+        conn.close() #fecha conexao com o banco sempre
 
 
 def init_db():
     """Inicializa o banco de dados criando as tabelas necessárias."""
-    # Executar migração primeiro
-    migrar_banco()
+    migrar_banco() #antes de criar as novas tabelas ele chama a funcao, para gatantir que as tabelas eantigas se ajustem ao novo formato
     
     with get_connection() as conn:
-        cursor = conn.cursor()
+        cursor = conn.cursor() #cursor de novo
         
         # Tabela de habilidades
         cursor.execute("""
@@ -68,7 +63,7 @@ def init_db():
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 nome TEXT UNIQUE NOT NULL
             )
-        """)
+        """) #cria a tanela caso n exista, identificador unico, nome da habilidade nao pode repitir, nem ser nulo
         
         # Tabela de usuários
         cursor.execute("""
@@ -79,7 +74,7 @@ def init_db():
                 senha_hash TEXT NOT NULL,
                 papel TEXT DEFAULT 'voluntario' CHECK(papel IN ('voluntario', 'admin'))
             )
-        """)
+        """) #email unico, senha criptografada, check para só aceitar voluntarios e adms,valor padrao usuario
         
         # Tabela de voluntários
         cursor.execute("""
@@ -90,7 +85,7 @@ def init_db():
                 cidade TEXT,
                 FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
             )
-        """)
+        """) #informaçoes estras dos voluntarios, cada usuario linkado via usuario_id, caso o usuario seja deletado o voluntario tambem é
         
         # Tabela de relação voluntário-habilidades
         cursor.execute("""
@@ -101,7 +96,7 @@ def init_db():
                 FOREIGN KEY (voluntario_id) REFERENCES voluntarios(id) ON DELETE CASCADE,
                 FOREIGN KEY (habilidade_id) REFERENCES habilidades(id) ON DELETE CASCADE
             )
-        """)
+        """) #inpede que um voluntario tenha a mesma habilidade duas vezes, se o voluntario ou habilidade sumirem o registro é apagado
         
         # Tabela de demandas
         cursor.execute("""
@@ -110,7 +105,7 @@ def init_db():
                 titulo TEXT NOT NULL,
                 criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
-        """)
+        """) #titulo obrigatorio, recebe a data atual automaticamente
         
         # Tabela de relação demanda-habilidades
         cursor.execute("""
@@ -121,48 +116,48 @@ def init_db():
                 FOREIGN KEY (demanda_id) REFERENCES demandas(id) ON DELETE CASCADE,
                 FOREIGN KEY (habilidade_id) REFERENCES habilidades(id) ON DELETE CASCADE
             )
-        """)
+        """) #relaciona demandas e habilidades necessarias, (on delete cascade garante a integridade)
         
-        conn.commit()
+        conn.commit() #salva tudo no banco
         
-        # Popular habilidades padrão
+        #habilidades padrão
         popular_habilidades_padrao()
 
 
-@contextmanager
+@contextmanager #transfroma a funcao em um gerenciador de contexto (para usar com 'with')
 def get_connection():
     """Context manager para conexões seguras com o banco."""
-    conn = sqlite3.connect(DB_FILE)
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON")
+    conn = sqlite3.connect(DB_FILE) #conecta no banco
+    conn.row_factory = sqlite3.Row #tranfroma rows em objetos que se comportam como dicionarios
+    conn.execute("PRAGMA foreign_keys = ON") #ativa foreign_keys, que no sqllite n vem ativa
     try:
-        yield conn
-        conn.commit()
+        yield conn #entrega a conexao para ser usando dentro do bloco with
+        conn.commit() #salva se n tiver erro
     except Exception:
-        conn.rollback()
-        raise
+        conn.rollback() #desfaz as cagadas
+        raise #raise para realcar o erro
     finally:
-        conn.close()
+        conn.close() #sempre fecha a conexao
 
 
 def criar_usuario(nome, email, senha_hash, papel='voluntario'):
     """Cria um novo usuário."""
-    with get_connection() as conn:
-        cursor = conn.cursor()
+    with get_connection() as conn: #abre conexao segura com o banco
+        cursor = conn.cursor() #curor de novo
         cursor.execute(
             "INSERT INTO usuarios (nome, email, senha_hash, papel) VALUES (?, ?, ?, ?)",
             (nome, email, senha_hash, papel)
-        )
-        return cursor.lastrowid
+        ) #insere as cinformacoes do usuario no banco
+        return cursor.lastrowid #retorna o id do novo usuario
 
 
 def buscar_usuario_por_email(email):
     """Busca usuário por email."""
-    with get_connection() as conn:
+    with get_connection() as conn: #abre conexao segura
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM usuarios WHERE email = ?", (email,))
-        row = cursor.fetchone()
-        return dict(row) if row else None
+        cursor.execute("SELECT * FROM usuarios WHERE email = ?", (email,)) #pega todas as colunas e filtra por e-mail
+        row = cursor.fetchone()#pega a primeira linha encontrada
+        return dict(row) if row else None # se row existe trnaformna em um dicionario pyton, se nao é none
 
 
 def popular_habilidades_padrao():
