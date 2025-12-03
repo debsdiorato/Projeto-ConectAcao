@@ -1,17 +1,34 @@
+<<<<<<< HEAD
 """Interface gráfica simples e funcional."""  # Docstring do módulo
 import tkinter as tk  # Importa o módulo tkinter para criar a interface gráfica
 from tkinter import ttk, messagebox  # Importa ttk (widgets temáticos) e messagebox (caixas de diálogo) do tkinter
 import database  # Importa o módulo database para operações com banco de dados
 import auth  # Importa o módulo auth para autenticação
 from matching import encontrar_matches  # Importa a função encontrar_matches do módulo matching
+=======
+import tkinter as tk                # Mantemos o tk padrão para Canvas e Text
+import ttkbootstrap as ttk         #  bootstrap com o apelido
+from tkinter import messagebox      # Messagebox continua vindo do tkinter padrão
+import database
+import auth
+from matching import encontrar_matches
+>>>>>>> 3e4560eab9764846471b0de69261b9a701c95b9a
 
 
 class App:
     def __init__(self):
+<<<<<<< HEAD
         self.root = tk.Tk()  # Cria a janela principal da aplicação
         self.root.title("ConectAção - Sistema de Voluntariado")  # Define o título da janela
         self.root.geometry("900x700")  # Define o tamanho inicial da janela (largura x altura)
         self.centralizar_janela()  # Chama o método para centralizar a janela na tela
+=======
+        self.root = ttk.Window(themename="superhero") 
+        
+        self.root.title("ConectAção - Sistema de Voluntariado")
+        self.root.geometry("900x700")
+        self.centralizar_janela()
+>>>>>>> 3e4560eab9764846471b0de69261b9a701c95b9a
         
         self.usuario_atual = None  # Inicializa a variável que armazena o usuário logado como None
         
@@ -95,8 +112,13 @@ class App:
         frame.pack(fill="both", expand=True)  # Empacota o frame preenchendo todo o espaço disponível
         
         # ========== SEÇÃO LOGIN ==========
+<<<<<<< HEAD
         login_frame = ttk.LabelFrame(frame, text="Login", padding=20)  # Cria um frame com label "Login" e padding de 20 pixels
         login_frame.pack(fill="x", pady=(0, 20))  # Empacota o frame preenchendo horizontalmente com margem inferior de 20 pixels
+=======
+        login_frame = ttk.Labelframe(frame, text="Login", padding=20)
+        login_frame.pack(fill="x", pady=(0, 20))
+>>>>>>> 3e4560eab9764846471b0de69261b9a701c95b9a
         
         ttk.Label(login_frame, text="Email:", font=("Arial", 10)).grid(row=0, column=0, sticky="w", pady=5, padx=5)  # Cria um label "Email:" e posiciona na grade
         self.email_entry = ttk.Entry(login_frame, width=45, font=("Arial", 10))  # Cria um campo de entrada para email com largura de 45 caracteres
@@ -115,8 +137,13 @@ class App:
         ttk.Button(btn_login_frame, text="Entrar", command=self.login, width=20).pack()  # Cria um botão "Entrar" que chama o método login quando clicado
         
         # ========== SEÇÃO CADASTRO ==========
+<<<<<<< HEAD
         cadastro_frame = ttk.LabelFrame(frame, text="Novo Cadastro", padding=20)  # Cria um frame com label "Novo Cadastro" e padding de 20 pixels
         cadastro_frame.pack(fill="x", pady=(0, 10))  # Empacota o frame preenchendo horizontalmente com margem inferior de 10 pixels
+=======
+        cadastro_frame = ttk.Labelframe(frame, text="Novo Cadastro", padding=20)
+        cadastro_frame.pack(fill="x", pady=(0, 10))
+>>>>>>> 3e4560eab9764846471b0de69261b9a701c95b9a
         
         # Nome
         ttk.Label(cadastro_frame, text="Nome completo:", font=("Arial", 10)).grid(row=0, column=0, sticky="w", pady=5, padx=5)  # Cria um label "Nome completo:" e posiciona na grade
@@ -140,11 +167,19 @@ class App:
         self.reg_confirmar_senha.bind("<Return>", lambda e: self.registrar())  # Vincula a tecla Enter ao método registrar
         
         # Dica de senha forte
+<<<<<<< HEAD
         dica_senha = ttk.Label(  # Cria um label com dica sobre senha forte
             cadastro_frame,  # Define o frame pai
             text="A senha deve conter: mínimo 8 caracteres, 1 maiúscula, 1 número e 1 caractere especial",  # Define o texto da dica
             font=("Arial", 8),  # Define a fonte como Arial tamanho 8
             foreground="gray"  # Define a cor do texto como cinza
+=======
+        dica_senha = ttk.Label(
+            cadastro_frame, 
+            text="A senha deve conter: mínimo 8 caracteres, 1 maiúscula, 1 número e 1 caractere especial",
+            font=("Arial", 8),
+            bootstyle="warning"
+>>>>>>> 3e4560eab9764846471b0de69261b9a701c95b9a
         )
         dica_senha.grid(row=4, column=0, columnspan=2, sticky="w", padx=5, pady=(0, 5))  # Posiciona o label na grade, ocupando duas colunas
         
@@ -290,8 +325,13 @@ class App:
         ttk.Label(title_frame, text="Sistema de Matching Inteligente", font=("Arial", 14, "bold")).pack(side="left")  # Cria um label de título em negrito e posiciona à esquerda
         
         # Frame de controles
+<<<<<<< HEAD
         controls_frame = ttk.LabelFrame(frame, text="Selecionar Demanda", padding=10)  # Cria um frame com label "Selecionar Demanda" e padding de 10 pixels
         controls_frame.pack(fill="x", pady=(0, 10))  # Empacota o frame preenchendo horizontalmente com margem inferior de 10 pixels
+=======
+        controls_frame = ttk.Labelframe(frame, text="Selecionar Demanda", padding=10)
+        controls_frame.pack(fill="x", pady=(0, 10))
+>>>>>>> 3e4560eab9764846471b0de69261b9a701c95b9a
         
         ttk.Label(controls_frame, text="Demanda:", font=("Arial", 10)).grid(row=0, column=0, sticky="w", padx=5, pady=5)  # Cria um label "Demanda:" e posiciona na grade
         self.match_combo = ttk.Combobox(controls_frame, state="readonly", width=70, font=("Arial", 10))  # Cria um combobox somente leitura com largura de 70 caracteres
@@ -304,8 +344,13 @@ class App:
         ttk.Button(btn_frame, text="🔍 Gerar Matches", command=self.gerar_matches).pack(side="left", padx=5)  # Cria um botão "Gerar Matches" que chama o método gerar_matches
         
         # Área de resultados
+<<<<<<< HEAD
         result_label_frame = ttk.LabelFrame(frame, text="Resultados do Matching", padding=5)  # Cria um frame com label "Resultados do Matching" e padding de 5 pixels
         result_label_frame.pack(fill="both", expand=True)  # Empacota o frame preenchendo todo o espaço disponível
+=======
+        result_label_frame = ttk.Labelframe(frame, text="Resultados do Matching", padding=5)
+        result_label_frame.pack(fill="both", expand=True)
+>>>>>>> 3e4560eab9764846471b0de69261b9a701c95b9a
         
         result_frame = ttk.Frame(result_label_frame)  # Cria um frame para os resultados
         result_frame.pack(fill="both", expand=True)  # Empacota o frame preenchendo todo o espaço disponível
