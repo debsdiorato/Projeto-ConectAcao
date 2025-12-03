@@ -167,41 +167,41 @@ def popular_habilidades_padrao():
         "Design", "Programação", "Contabilidade", "Advocacia", "Medicina",
         "Psicologia", "Arquitetura", "Jornalismo", "Fotografia", "Culinária",
         "Música", "Artes", "Esportes", "Idiomas", "Administração"
-    ]
+    ]#contem todas as habilidades que sarao criadas automaticamente quando inicializar o banco, cada item vira uma linha na tabela
     
-    with get_connection() as conn:
-        cursor = conn.cursor()
-        for hab in habilidades_padrao:
-            try:
-                cursor.execute("INSERT OR IGNORE INTO habilidades (nome) VALUES (?)", (hab,))
+    with get_connection() as conn: #abre conexao com o banco
+        cursor = conn.cursor() #cursor de novo
+        for hab in habilidades_padrao: #loop para passar todas as habilidades
+            try: #try para caso de erro ele continue inserindo as habilidades
+                cursor.execute("INSERT OR IGNORE INTO habilidades (nome) VALUES (?)", (hab,)) #tenta inserir a habilidade na lista, caso ja exista ele ignora
             except:
                 pass
-        conn.commit()
+        conn.commit() #salva as paradas
 
 
 def listar_habilidades():
     """Lista todas as habilidades disponíveis."""
-    with get_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM habilidades ORDER BY nome")
-        return [dict(row) for row in cursor.fetchall()]
+    with get_connection() as conn: #abre a conexao com o banco
+        cursor = conn.cursor() #cursor novamente
+        cursor.execute("SELECT * FROM habilidades ORDER BY nome") #puxa todas as habilidades cadastradas no banco
+        return [dict(row) for row in cursor.fetchall()] #pega todas as linhas, tranforma em um dicionário e devolve elas como lista
 
 
 def criar_voluntario(usuario_id, habilidades_ids, disponibilidade="", cidade=""):
     """Cria perfil de voluntário com habilidades."""
-    with get_connection() as conn:
-        cursor = conn.cursor()
+    with get_connection() as conn: #conexao com banco
+        cursor = conn.cursor() 
         cursor.execute(
             "INSERT INTO voluntarios (usuario_id, disponibilidade, cidade) VALUES (?, ?, ?)",
-            (usuario_id, disponibilidade, cidade)
-        )
-        voluntario_id = cursor.lastrowid
+            (usuario_id, disponibilidade, cidade) 
+        ) #insere um novo usuario com id, disponibilidade e cidade
+        voluntario_id = cursor.lastrowid #pega o id no novo voluntario
         
         # Adicionar habilidades
-        for hab_id in habilidades_ids:
+        for hab_id in habilidades_ids: #loop para chegar na habilidade selecionada
             cursor.execute(
                 "INSERT INTO voluntario_habilidades (voluntario_id, habilidade_id) VALUES (?, ?)",
-                (voluntario_id, hab_id)
+                (voluntario_id, hab_id) #insere a habilidade na tabela de relaçao
             )
 
 
