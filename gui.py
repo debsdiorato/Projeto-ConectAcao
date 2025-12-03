@@ -1,6 +1,6 @@
-"""Interface gráfica simples e funcional."""
-import tkinter as tk
-from tkinter import ttk, messagebox
+import tkinter as tk                # Mantemos o tk padrão para Canvas e Text
+import ttkbootstrap as ttk         #  bootstrap com o apelido
+from tkinter import messagebox      # Messagebox continua vindo do tkinter padrão
 import database
 import auth
 from matching import encontrar_matches
@@ -8,7 +8,8 @@ from matching import encontrar_matches
 
 class App:
     def __init__(self):
-        self.root = tk.Tk()
+        self.root = ttk.Window(themename="superhero") 
+        
         self.root.title("ConectAção - Sistema de Voluntariado")
         self.root.geometry("900x700")
         self.centralizar_janela()
@@ -99,7 +100,7 @@ class App:
         frame.pack(fill="both", expand=True)
         
         # ========== SEÇÃO LOGIN ==========
-        login_frame = ttk.LabelFrame(frame, text="Login", padding=20)
+        login_frame = ttk.Labelframe(frame, text="Login", padding=20)
         login_frame.pack(fill="x", pady=(0, 20))
         
         ttk.Label(login_frame, text="Email:", font=("Arial", 10)).grid(row=0, column=0, sticky="w", pady=5, padx=5)
@@ -119,7 +120,7 @@ class App:
         ttk.Button(btn_login_frame, text="Entrar", command=self.login, width=20).pack()
         
         # ========== SEÇÃO CADASTRO ==========
-        cadastro_frame = ttk.LabelFrame(frame, text="Novo Cadastro", padding=20)
+        cadastro_frame = ttk.Labelframe(frame, text="Novo Cadastro", padding=20)
         cadastro_frame.pack(fill="x", pady=(0, 10))
         
         # Nome
@@ -294,7 +295,7 @@ class App:
         ttk.Label(title_frame, text="Sistema de Matching Inteligente", font=("Arial", 14, "bold")).pack(side="left")
         
         # Frame de controles
-        controls_frame = ttk.LabelFrame(frame, text="Selecionar Demanda", padding=10)
+        controls_frame = ttk.Labelframe(frame, text="Selecionar Demanda", padding=10)
         controls_frame.pack(fill="x", pady=(0, 10))
         
         ttk.Label(controls_frame, text="Demanda:", font=("Arial", 10)).grid(row=0, column=0, sticky="w", padx=5, pady=5)
@@ -308,7 +309,7 @@ class App:
         ttk.Button(btn_frame, text="🔍 Gerar Matches", command=self.gerar_matches).pack(side="left", padx=5)
         
         # Área de resultados
-        result_label_frame = ttk.LabelFrame(frame, text="Resultados do Matching", padding=5)
+        result_label_frame = ttk.Labelframe(frame, text="Resultados do Matching", padding=5)
         result_label_frame.pack(fill="both", expand=True)
         
         result_frame = ttk.Frame(result_label_frame)
