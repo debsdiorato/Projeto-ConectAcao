@@ -1,16 +1,18 @@
 """Interface gráfica simples e funcional."""  # Docstring do módulo
-import tkinter as tk  # Importa o módulo tkinter para criar a interface gráfica
-from tkinter import ttk, messagebox  # Importa ttk (widgets temáticos) e messagebox (caixas de diálogo) do tkinter
-import database  # Importa o módulo database para operações com banco de dados
-import auth  # Importa o módulo auth para autenticação
-from matching import encontrar_matches  # Importa a função encontrar_matches do módulo matching
+import tkinter as tk                # Mantemos o tk padrão para Canvas e Text
+import ttkbootstrap as ttk          # IMPORTANTE: Importamos o bootstrap com o apelido 'ttk'
+from tkinter import messagebox      # Messagebox continua vindo do tkinter padrão
+import database
+import auth
+from matching import encontrar_matches
 
 
 class App:
     def __init__(self):
-        self.root = tk.Tk()  # Cria a janela principal da aplicação
-        self.root.title("ConectAção - Sistema de Voluntariado")  # Define o título da janela
-        self.root.geometry("900x700")  # Define o tamanho inicial da janela (largura x altura)
+        self.root = ttk.Window(themename="cyborg") 
+        
+        self.root.title("ConectAção - Sistema de Voluntariado")
+        self.root.geometry("900x700")
         self.centralizar_janela()  # Chama o método para centralizar a janela na tela
         
         self.usuario_atual = None  # Inicializa a variável que armazena o usuário logado como None
