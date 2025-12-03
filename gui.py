@@ -149,7 +149,7 @@ class App:
             cadastro_frame, 
             text="A senha deve conter: mínimo 8 caracteres, 1 maiúscula, 1 número e 1 caractere especial",
             font=("Arial", 8),
-            foreground="gray"
+            bootstyle="warning"
         )
         dica_senha.grid(row=4, column=0, columnspan=2, sticky="w", padx=5, pady=(0, 5))
         
