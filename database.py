@@ -213,71 +213,71 @@ def listar_voluntarios():
             SELECT v.id, v.usuario_id, v.disponibilidade, v.cidade, u.nome, u.email
             FROM voluntarios v
             JOIN usuarios u ON u.id = v.usuario_id
-        """)
-        voluntarios = [dict(row) for row in cursor.fetchall()]
+        """) #pega todos os voluntarios e faz um join com a tabela usuarios, pegando as informacoes do  voluntario
+        voluntarios = [dict(row) for row in cursor.fetchall()] #tranformar em dicionario pyton
         
         # Adicionar habilidades para cada voluntário
-        for vol in voluntarios:
+        for vol in voluntarios: #loop para percorer os voluntarios
             cursor.execute("""
                 SELECT h.id, h.nome
                 FROM habilidades h
                 JOIN voluntario_habilidades vh ON h.id = vh.habilidade_id
                 WHERE vh.voluntario_id = ?
-            """, (vol['id'],))
-            vol['habilidades'] = [dict(row) for row in cursor.fetchall()]
-            vol['habilidades_nomes'] = [h['nome'] for h in vol['habilidades']]
+            """, (vol['id'],)) #pega as habilidades, faz um join com a tabela voluntarios_habilidades, filtra pelo id
+            vol['habilidades'] = [dict(row) for row in cursor.fetchall()] #converte aas habilidades em dicionarios
+            vol['habilidades_nomes'] = [h['nome'] for h in vol['habilidades']] #gera lista só com os nomes
         
-        return voluntarios
+        return voluntarios #devolve a lista com todas as informacoes do voluntario
 
 
 def criar_demanda(titulo, habilidades_ids):
     """Cria uma nova demanda com habilidades."""
     with get_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO demandas (titulo) VALUES (?)", (titulo,))
-        demanda_id = cursor.lastrowid
+        cursor.execute("INSERT INTO demandas (titulo) VALUES (?)", (titulo,)) #inseire uma nova demanda
+        demanda_id = cursor.lastrowid #pega o id da nova demanda
         
         # Adicionar habilidades
-        for hab_id in habilidades_ids:
+        for hab_id in habilidades_ids: #loop para inserir habilidades da demanda
             cursor.execute(
                 "INSERT INTO demanda_habilidades (demanda_id, habilidade_id) VALUES (?, ?)",
                 (demanda_id, hab_id)
             )
-        return demanda_id
+        return demanda_id #retorna o id da nova demanda
 
 
 def listar_demandas():
     """Lista todas as demandas com suas habilidades."""
     with get_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM demandas ORDER BY criado_em DESC")
-        demandas = [dict(row) for row in cursor.fetchall()]
+        cursor.execute("SELECT * FROM demandas ORDER BY criado_em DESC") #pega as demandas por ordem de ciraçao
+        demandas = [dict(row) for row in cursor.fetchall()] #tranforma em dicionario
         
         # Adicionar habilidades para cada demanda
-        for dem in demandas:
+        for dem in demandas: #loop para adicionar habilidades
             cursor.execute("""
                 SELECT h.id, h.nome
                 FROM habilidades h
                 JOIN demanda_habilidades dh ON h.id = dh.habilidade_id
                 WHERE dh.demanda_id = ?
-            """, (dem['id'],))
-            dem['habilidades'] = [dict(row) for row in cursor.fetchall()]
-            dem['habilidades_nomes'] = [h['nome'] for h in dem['habilidades']]
-            dem['habilidades_requeridas'] = ", ".join(dem['habilidades_nomes'])
+            """, (dem['id'],)) #faz join com demandas_habilidades, pega todas as habilidades ligadas a demanda
+            dem['habilidades'] = [dict(row) for row in cursor.fetchall()] #tranforma em dicionario
+            dem['habilidades_nomes'] = [h['nome'] for h in dem['habilidades']] #cria lista só com o nome das habilidades
+            dem['habilidades_requeridas'] = ", ".join(dem['habilidades_nomes']) #cria string com nomes separados por virgulas
         
-        return demandas
+        return demandas #retorna as demandas completas
 
 
 def buscar_demanda_por_id(demanda_id):
     """Busca demanda por ID com habilidades."""
     with get_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM demandas WHERE id = ?", (demanda_id,))
-        row = cursor.fetchone()
-        if not row:
+        cursor.execute("SELECT * FROM demandas WHERE id = ?", (demanda_id,)) #procura a demanda pelo id
+        row = cursor.fetchone() #pega a primera linha
+        if not row: #se n achou retorna none
             return None
         
-        demanda = dict(row)
+        demanda = dict(row) #converte em dicionario
         
         # Buscar habilidades
         cursor.execute("""
@@ -285,10 +285,10 @@ def buscar_demanda_por_id(demanda_id):
             FROM habilidades h
             JOIN demanda_habilidades dh ON h.id = dh.habilidade_id
             WHERE dh.demanda_id = ?
-        """, (demanda_id,))
-        demanda['habilidades'] = [dict(row) for row in cursor.fetchall()]
-        demanda['habilidades_nomes'] = [h['nome'] for h in demanda['habilidades']]
-        demanda['habilidades_requeridas'] = ", ".join(demanda['habilidades_nomes'])
+        """, (demanda_id,)) #pega as habilidades ligadas a demanda
+        demanda['habilidades'] = [dict(row) for row in cursor.fetchall()] #transforma em dicionario de novo
+        demanda['habilidades_nomes'] = [h['nome'] for h in demanda['habilidades']] #cria lista apenas com nomes
+        demanda['habilidades_requeridas'] = ", ".join(demanda['habilidades_nomes']) #cria uma string
         
-        return demanda
+        return demanda #retorna tudo
 
