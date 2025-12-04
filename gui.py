@@ -276,10 +276,11 @@ class App:
         self.dem_tree.pack(side="left", fill="both", expand=True)  # Empacota a treeview à esquerda, preenchendo todo o espaço
         scrollbar.pack(side="right", fill="y")  # Empacota a scrollbar à direita, preenchendo verticalmente
         
-        btn_frame = ttk.Frame(frame)  # Cria um frame para conter os botões
-        btn_frame.pack(pady=5)  # Empacota o frame com margem vertical de 5 pixels
-        ttk.Button(btn_frame, text="Criar Demanda", command=self.criar_demanda).pack(side="left", padx=5)  # Cria um botão "Criar Demanda" que chama o método criar_demanda
-        ttk.Button(btn_frame, text="Atualizar", command=self.atualizar_demandas).pack(side="left", padx=5)  # Cria um botão "Atualizar" que chama o método atualizar_demandas
+        btn_frame = ttk.Frame(frame)
+        btn_frame.pack(pady=5) # Transformamos em self.btn_criar_demanda para poder esconder depois
+        self.btn_criar_demanda = ttk.Button(btn_frame, text="Criar Demanda", command=self.criar_demanda, bootstyle="success")
+        self.btn_criar_demanda.pack(side="left", padx=5)
+        ttk.Button(btn_frame, text="Atualizar", command=self.atualizar_demandas, bootstyle="info").pack(side="left", padx=5)
     
     def criar_aba_matching(self):
         """Cria a aba de matching."""  # Docstring do método
@@ -320,52 +321,77 @@ class App:
         scrollbar.pack(side="right", fill="y", pady=5)  # Empacota a scrollbar à direita, preenchendo verticalmente
     
     def login(self):
-        """Realiza login do usuário."""  # Docstring do método
-        email = self.email_entry.get().strip()  # Obtém o email digitado e remove espaços em branco
-        senha = self.senha_entry.get().strip()  # Obtém a senha digitada e remove espaços em branco
+        """Realiza login do usuário."""
+        email = self.email_entry.get().strip()
+        senha = self.senha_entry.get().strip()
         
-        if not email:  # Verifica se o email está vazio
-            messagebox.showerror("Erro", "Digite seu email")  # Exibe mensagem de erro
-            self.email_entry.focus()  # Foca no campo de email
-            return  # Retorna para interromper a execução
+        if not email:
+            messagebox.showerror("Erro", "Digite seu email")
+            self.email_entry.focus()
+            return
         
-        if not senha:  # Verifica se a senha está vazia
-            messagebox.showerror("Erro", "Digite sua senha")  # Exibe mensagem de erro
-            self.senha_entry.focus()  # Foca no campo de senha
-            return  # Retorna para interromper a execução
+        if not senha:
+            messagebox.showerror("Erro", "Digite sua senha")
+            self.senha_entry.focus()
+            return
         
         # Verifica se é admin do .env
-        if auth.verificar_admin(email, senha):  # Verifica se as credenciais são do administrador
-            self.usuario_atual = auth.get_admin_info()  # Define o usuário atual como administrador
-            messagebox.showinfo("Sucesso", f"Bem-vindo, {self.usuario_atual['nome']}!\nPerfil: Administrador")  # Exibe mensagem de sucesso
-            # Limpar campos
-            self.email_entry.delete(0, tk.END)  # Limpa o campo de email
-            self.senha_entry.delete(0, tk.END)  # Limpa o campo de senha
-            # Atualizar listas e ir para demandas
-            self.atualizar_listas()  # Atualiza as listas de dados
-            self.notebook.select(self.tab_demandas)  # Seleciona a aba de demandas
-            return  # Retorna para interromper a execução
+        if auth.verificar_admin(email, senha):
+            self.usuario_atual = auth.get_admin_info()
+            messagebox.showinfo("Sucesso", f"Bem-vindo, {self.usuario_atual['nome']}!\nPerfil: Administrador")
+            
+            # === LÓGICA ADMIN: MOSTRAR TUDO ===
+            
+            # 1. Botão de criar demanda
+            self.btn_criar_demanda.pack(side="left", padx=5)
+            
+            # 2. Restaurar aba Voluntários (se não estiver lá) - Posição 1 (logo após Login)
+            if str(self.tab_voluntarios) not in self.notebook.tabs():
+                self.notebook.insert(1, self.tab_voluntarios, text="Voluntários")
+
+            # 3. Restaurar aba Matching (se não estiver lá) - Vai para o final
+            if str(self.tab_matching) not in self.notebook.tabs():
+                self.notebook.add(self.tab_matching, text="Matching")
+            
+            # Limpar e ir para demandas
+            self.email_entry.delete(0, tk.END)
+            self.senha_entry.delete(0, tk.END)
+            self.atualizar_listas()
+            self.notebook.select(self.tab_demandas)
+            return
         
         # Login normal
-        usuario = database.buscar_usuario_por_email(email)  # Busca o usuário no banco de dados pelo email
-        if not usuario:  # Verifica se o usuário não foi encontrado
-            messagebox.showerror("Erro", "Email não cadastrado")  # Exibe mensagem de erro
-            self.email_entry.focus()  # Foca no campo de email
-            return  # Retorna para interromper a execução
+        usuario = database.buscar_usuario_por_email(email)
+        if not usuario:
+            messagebox.showerror("Erro", "Email não cadastrado")
+            self.email_entry.focus()
+            return
         
-        if not auth.verificar_senha(usuario['senha_hash'], senha):  # Verifica se a senha está correta
-            messagebox.showerror("Erro", "Senha incorreta")  # Exibe mensagem de erro
-            self.senha_entry.delete(0, tk.END)  # Limpa o campo de senha
-            self.senha_entry.focus()  # Foca no campo de senha
-            return  # Retorna para interromper a execução
+        if not auth.verificar_senha(usuario['senha_hash'], senha):
+            messagebox.showerror("Erro", "Senha incorreta")
+            self.senha_entry.delete(0, tk.END)
+            self.senha_entry.focus()
+            return
         
-        self.usuario_atual = dict(usuario)  # Define o usuário atual como o usuário encontrado
-        messagebox.showinfo("Sucesso", f"Bem-vindo, {usuario['nome']}!\nPerfil: {usuario['papel'].title()}")  # Exibe mensagem de sucesso
-        # Limpar campos
-        self.email_entry.delete(0, tk.END)  # Limpa o campo de email
-        self.senha_entry.delete(0, tk.END)  # Limpa o campo de senha
-        self.atualizar_listas()  # Atualiza as listas de dados
-        self.notebook.select(self.tab_demandas)  # Seleciona a aba de demandas
+        self.usuario_atual = dict(usuario)
+        messagebox.showinfo("Sucesso", f"Bem-vindo, {usuario['nome']}!\nPerfil: {usuario['papel'].title()}")
+        
+        # === LÓGICA VOLUNTÁRIO: ESCONDER COISAS ===
+        
+        # 1. Esconde botão criar demanda
+        self.btn_criar_demanda.pack_forget()
+        
+        # 2. Esconde aba de Matching
+        self.notebook.forget(self.tab_matching)
+        
+        # 3. Esconde aba de Voluntários (NOVO)
+        self.notebook.forget(self.tab_voluntarios)
+
+        # Limpar e ir para demandas
+        self.email_entry.delete(0, tk.END)
+        self.senha_entry.delete(0, tk.END)
+        self.atualizar_listas()
+        self.notebook.select(self.tab_demandas)
     
     def registrar(self):
         """Registra novo voluntário."""  # Docstring do método
